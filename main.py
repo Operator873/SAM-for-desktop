@@ -1,15 +1,88 @@
 import PySimpleGUI as sg
-# import SAM # todo write SAM with API interaction functions
+# import SAMtools as sam # todo write SAM with API interaction functions
 
 
 def main():
-    options = ['Block', 'Hard block', 'Spam bot', 'Lock', 'Global block', 'Mass block', 'Mass lock', 'Setup SAM']
 
     layout = [
         [
-            sg.Text("Select action to take", size=(15, 1), justification='right'),
-            sg.InputCombo(options, size=(15, 1), key="action"),
-            sg.Submit(key="-MAIN-")
+            sg.Text(
+                "Welcome to Steward/Sysop Action Module!",
+                font=("Helvetica", 16),
+                size=(40, 1),
+                justification='c'
+            )
+        ],
+        [
+            sg.Text(
+                "By using this module, you accept responsibility for your actions...",
+                justification='c',
+                size=(60, 1),
+            )
+        ],
+        [
+            sg.Text(
+                "and mistakes.",
+                justification='c',
+                size=(60, 1),
+            )
+        ],
+        [
+            sg.Button("I accept")
+        ],
+        [
+            sg.Text(
+                "By Operator873",
+                size=(80, 1),
+                justification='r',
+                font=("Helvetica", 8),
+                text_color="light gray"
+            )
+        ]
+    ]
+
+    start_window = sg.Window("Steward/Sysop Action Module", layout)
+
+    start_window.Read()
+
+    start_window.close()
+
+    start_sam()
+
+
+def start_sam():
+
+    layout = [
+        [
+            sg.Text("Blocks")
+        ],
+        [
+            sg.Button("Block", key='block'),
+            sg.Button("Hard block", key='hardblock'),
+            sg.Button("Spam bot block", key='spambot'),
+            sg.Button("Global block", key='gblock')
+        ],
+        [
+            sg.Text("CentralAuth")
+        ],
+        [
+            sg.Button("Lock", key='lock'),
+            sg.Button("Unlock", key='unlock')
+        ],
+        [
+            sg.Text("Mass actions")
+        ],
+        [
+            sg.Button("Mass Block", key='massblock'),
+            sg.Button("Mass Global Block", key='massgblock'),
+            sg.Button("Mass Lock", key='masslock')
+        ],
+        [
+            sg.Text("Setup options")
+        ],
+        [
+            sg.Button("Setup OAuth", key='oauth'),
+            sg.Button("Add Project/API", key='addapi')
         ],
         [
             sg.Text(
@@ -22,34 +95,39 @@ def main():
         ]
     ]
 
-    window = sg.Window("Steward/Sysop Action Module", layout, size=(400, 70))
+    window = sg.Window("Steward/Sysop Action Module", layout)
 
     while True:
         event, values = window.Read()
-        # print(event + str(values)) # For debugging only
+        #  print("Event: " + event + " || Values: " + str(values)) # For debugging only
         if event == "Exit" or event == sg.WIN_CLOSED:
             break
-        elif event == "-MAIN-":
-            if values['action'] == "Block":
-                get_block()
-            elif values['action'] == "Hard block":
-                get_hardblock()
-            elif values['action'] == "Spam bot":
-                get_spambot()
-            elif values['action'] == "Lock":
-                get_lock()
-            elif values['action'] == "Global block":
-                get_globalblock()
-            elif values['action'] == "Mass Block":
-                get_massblock()
-            elif values['action'] == "Mass lock":
-                get_masslock()
-            elif values['action'] == "":
-                sg.Popup("You kinda have to chose something...", title="PEBKAC Error!")
-            else:
-                sg.Popup("An unknown selection was received. Try again.", title="Unknown error!")
-
-            window['action'].update('')
+        elif event == "block":
+            get_block()
+        elif event == "hardblock":
+            get_hardblock()
+        elif event == "spambot":
+            get_spambot()
+        elif event == "lock":
+            get_lock()
+        elif event == "unlock":
+            get_unlock()
+        elif event == "gblock":
+            get_globalblock()
+        elif event == "massblock":
+            get_massblock()
+        elif event == "massgblock":
+            get_massgblock()
+        elif event == "masslock":
+            get_masslock()
+        elif event == "oauth":
+            get_oauth()
+        elif event == "addapi":
+            get_addapi()
+        elif event == "":
+            sg.Popup("You kinda have to chose something...", title="PEBKAC Error!")
+        else:
+            sg.Popup("An unknown selection was received. Try again.", title="Unknown error!")
 
 
 def get_block():
@@ -193,23 +271,192 @@ def get_hardblock():
 
 
 def get_spambot():  # todo Write get_spambot
-    pass
+    layout = [
+        [
+            sg.Text("This will be the Spam bot interface")
+        ],
+        [
+            sg.Exit()
+        ]
+    ]
+
+    new_window = sg.Window("SAM: Apply Spam bot block", layout)
+
+    while True:
+        event, values = new_window.Read()
+
+        if event == "Exit" or event == sg.WIN_CLOSED:
+            break
+
+    new_window.close()
 
 
 def get_lock():  # todo write get_lock
-    pass
+    layout = [
+        [
+            sg.Text("This will be the Lock interface")
+        ],
+        [
+            sg.Exit()
+        ]
+    ]
+
+    new_window = sg.Window("SAM: Apply Lock", layout)
+
+    while True:
+        event, values = new_window.Read()
+
+        if event == "Exit" or event == sg.WIN_CLOSED:
+            break
+
+    new_window.close()
 
 
 def get_globalblock():  # todo write get_globalblock
-    pass
+    layout = [
+        [
+            sg.Text("This will be the Global lock interface")
+        ],
+        [
+            sg.Exit()
+        ]
+    ]
+
+    new_window = sg.Window("SAM: Apply global block", layout)
+
+    while True:
+        event, values = new_window.Read()
+
+        if event == "Exit" or event == sg.WIN_CLOSED:
+            break
+
+    new_window.close()
 
 
 def get_massblock():  # todo write get_massblock
-    pass
+    layout = [
+        [
+            sg.Text("This will be the mass block interface")
+        ],
+        [
+            sg.Exit()
+        ]
+    ]
+
+    new_window = sg.Window("SAM: Apply mass blocks", layout)
+
+    while True:
+        event, values = new_window.Read()
+
+        if event == "Exit" or event == sg.WIN_CLOSED:
+            break
+
+    new_window.close()
 
 
 def get_masslock():  # todo write get_masslock
-    pass
+    layout = [
+        [
+            sg.Text("This will be the Mass lock interface")
+        ],
+        [
+            sg.Exit()
+        ]
+    ]
+
+    new_window = sg.Window("SAM: Apply mass locks", layout)
+
+    while True:
+        event, values = new_window.Read()
+
+        if event == "Exit" or event == sg.WIN_CLOSED:
+            break
+
+    new_window.close()
+
+
+def get_massgblock():  # todo write get_massgblock
+    layout = [
+        [
+            sg.Text("This will be the mass global block interface")
+        ],
+        [
+            sg.Exit()
+        ]
+    ]
+
+    new_window = sg.Window("SAM: Apply mass global block", layout)
+
+    while True:
+        event, values = new_window.Read()
+
+        if event == "Exit" or event == sg.WIN_CLOSED:
+            break
+
+    new_window.close()
+
+
+def get_unlock():  # todo write get_unlock
+    layout = [
+        [
+            sg.Text("This will be the Unlock interface")
+        ],
+        [
+            sg.Exit()
+        ]
+    ]
+
+    new_window = sg.Window("SAM: Apply Unlock", layout)
+
+    while True:
+        event, values = new_window.Read()
+
+        if event == "Exit" or event == sg.WIN_CLOSED:
+            break
+
+    new_window.close()
+
+
+def get_oauth():  # todo write get_oauth
+    layout = [
+        [
+            sg.Text("This will be the OAuth interface")
+        ],
+        [
+            sg.Exit()
+        ]
+    ]
+
+    new_window = sg.Window("SAM: Add OAuth", layout)
+
+    while True:
+        event, values = new_window.Read()
+
+        if event == "Exit" or event == sg.WIN_CLOSED:
+            break
+
+    new_window.close()
+
+
+def get_addapi():  # todo write get_addapi
+    layout = [
+        [
+            sg.Text("This will be the add project/API interface")
+        ],
+        [
+            sg.Exit()
+        ]
+    ]
+
+    new_window = sg.Window("SAM: Add project", layout)
+
+    while True:
+        event, values = new_window.Read()
+
+        if event == "Exit" or event == sg.WIN_CLOSED:
+            break
+
+    new_window.close()
 
 
 main()
