@@ -1,4 +1,5 @@
 import PySimpleGUI as sg
+# import SAM # todo write SAM with API interaction functions
 
 
 def main():
@@ -191,23 +192,23 @@ def get_hardblock():
                 break
 
 
-def get_spambot():
+def get_spambot():  # todo Write get_spambot
     pass
 
 
-def get_lock():
+def get_lock():  # todo write get_lock
     pass
 
 
-def get_globalblock():
+def get_globalblock():  # todo write get_globalblock
     pass
 
 
-def get_massblock():
+def get_massblock():  # todo write get_massblock
     pass
 
 
-def get_masslock():
+def get_masslock():  # todo write get_masslock
     pass
 
 
