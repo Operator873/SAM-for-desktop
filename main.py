@@ -1,7 +1,14 @@
 import PySimpleGUI as sg
 import SAMtools as sam # todo finish SAMtools
+import configparser
+
+SAM = configparser.ConfigParser()
+
+SAM.read('SAM.cfg')
 
 def main():
+
+    read_config()
 
     layout = [
         [
@@ -51,7 +58,7 @@ def main():
 
 def start_sam():
     
-    if sam.check_OAuth():
+    if SAM.has_ :
         layout = [
             [
                 sg.Text("Blocks")
@@ -571,6 +578,7 @@ def get_addapi():  # todo write get_addapi
             break
 
     new_window.close()
+
 
 if __name__ == "__main__":
     main()
