@@ -2,13 +2,11 @@ import PySimpleGUI as sg
 import SAMtools as sam # todo finish SAMtools
 import configparser
 
-SAM = configparser.ConfigParser()
 
+SAM = configparser.ConfigParser()
 SAM.read('SAM.cfg')
 
 def main():
-
-    read_config()
 
     layout = [
         [
@@ -58,7 +56,12 @@ def main():
 
 def start_sam():
     
-    if SAM.has_ :
+    if (
+        SAM['OAuth']['consumer_token'] != "" and
+        SAM['OAuth']['consumer_secret'] != "" and
+        SAM['OAuth']['access_token'] != "" and
+        SAM['OAuth']['access_secret'] != ""
+    ):
         layout = [
             [
                 sg.Text("Blocks")
@@ -212,7 +215,7 @@ def get_block():
             sg.Text("Enter duration:", size=(15, 1), justification='r'),
             sg.InputText(key='duration', size=(15, 1)),
             sg.Text("Enter project:", size=(10, 1), justification='r'),
-            sg.InputText(key='project', default_text=sam.homewiki(), size=(15, 1))
+            sg.InputText(key='project', default_text=SAM['HomeWiki']['homewiki'], size=(15, 1))
         ],
         [
             sg.Submit(),
@@ -250,13 +253,11 @@ def get_block():
                     title="Project error!"
                 )
             else:
-                # sam.block(block_values)
-                sg.Popup(
-                    block_values['target'] +
-                    " would be blocked for " + block_values['duration'] +
-                    " on " + block_values['project'] +
-                    " with reason: " + block_values['reason']
-                )
+                work = sam.block(SAM, block_values)
+                if work['status'] == "Success":
+                    sg.Popup(work['message'], title="Success!")
+                else:
+                    sg.Popup(work['message'], title="Failed!!")
                 block_window.close()
                 break
 
@@ -293,7 +294,7 @@ def get_hardblock():
             sg.Text("Enter duration:", size=(15, 1), justification='r'),
             sg.InputText(key='duration', size=(15, 1)),
             sg.Text("Enter project:", size=(10, 1), justification='r'),
-            sg.InputText(key='project', default_text=sam.homewiki(), size=(15, 1))
+            sg.InputText(key='project', default_text=SAM['HomeWiki']['homewiki'], size=(15, 1))
         ],
         [
             sg.Submit(),
@@ -311,7 +312,7 @@ def get_hardblock():
 
     while True:
         block_event, block_values = hblock_window.Read()
-
+        print(block_values)
         if block_event == "Exit" or block_event == sg.WIN_CLOSED:
             break
         elif block_event == "stop":
@@ -367,11 +368,12 @@ def get_spambot():  # todo Write get_spambot
         ],
         [
             sg.Text("Enter project:", size=(15, 1), justification='r'),
-            sg.InputText(key='project', default_text=sam.homewiki(), size=(15, 1))
+            sg.InputText(key='project', default_text=SAM['HomeWiki']['homewiki'], size=(15, 1))
         ],
         [
             sg.Submit(),
             sg.Button("Cancel", key="stop"),
+            sg.Checkbox('Mark as Global Sysop action', default=False, key='gs')
         ]
     ]
 
@@ -397,7 +399,7 @@ def get_spambot():  # todo Write get_spambot
                     title="Project error!"
                 )
             else:
-                result = sam.spambot(block_values)
+                result = sam.spambot(SAM, block_values)
                 if result['status'] == "Success":
                     sg.Popup(
                         result['message'],
@@ -410,7 +412,6 @@ def get_spambot():  # todo Write get_spambot
                     )
                 block_window.close()
                 break
-######################################################################
 
 def get_lock():  # todo write get_lock
     layout = [
