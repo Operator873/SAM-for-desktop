@@ -1,6 +1,5 @@
 import PySimpleGUI as sg
-# import SAMtools as sam # todo write SAM with API interaction functions
-
+import SAMtools as sam # todo finish SAMtools
 
 def main():
 
@@ -51,54 +50,98 @@ def main():
 
 
 def start_sam():
-
-    layout = [
-        [
-            sg.Text("Blocks")
-        ],
-        [
-            sg.Button("Block", key='block'),
-            sg.Button("Hard block", key='hardblock'),
-            sg.Button("Spam bot block", key='spambot'),
-            sg.Button("Global block", key='gblock')
-        ],
-        [
-            sg.Text("CentralAuth")
-        ],
-        [
-            sg.Button("Lock", key='lock'),
-            sg.Button("Unlock", key='unlock')
-        ],
-        [
-            sg.Text("Mass actions")
-        ],
-        [
-            sg.Button("Mass Block", key='massblock'),
-            sg.Button("Mass Global Block", key='massgblock'),
-            sg.Button("Mass Lock", key='masslock')
-        ],
-        [
-            sg.Text("Setup options")
-        ],
-        [
-            sg.Button("Setup OAuth", key='oauth'),
-            sg.Button("Add Project/API", key='addapi')
-        ],
-        [
-            sg.Text(
-                "By Operator873",
-                size=(60, 1),
-                justification='r',
-                font=("Helvetica", 8),
-                text_color="light gray"
-            )
+    
+    if sam.check_OAuth():
+        layout = [
+            [
+                sg.Text("Blocks")
+            ],
+            [
+                sg.Button("Block", key='block'),
+                sg.Button("Hard block", key='hardblock'),
+                sg.Button("Spam bot block", key='spambot'),
+                sg.Button("Global block", key='gblock')
+            ],
+            [
+                sg.Text("CentralAuth")
+            ],
+            [
+                sg.Button("Lock", key='lock'),
+                sg.Button("Unlock", key='unlock')
+            ],
+            [
+                sg.Text("Mass actions")
+            ],
+            [
+                sg.Button("Mass Block", key='massblock'),
+                sg.Button("Mass Global Block", key='massgblock'),
+                sg.Button("Mass Lock", key='masslock')
+            ],
+            [
+                sg.Text("Setup options")
+            ],
+            [
+                sg.Button("Setup OAuth", key='oauth'),
+                sg.Button("Add Project/API", key='addapi')
+            ],
+            [
+                sg.Text(
+                    "By Operator873",
+                    size=(60, 1),
+                    justification='r',
+                    font=("Helvetica", 8),
+                    text_color="light gray"
+                )
+            ]
         ]
-    ]
+    else:
+        layout = [
+            [
+                sg.Text("Blocks")
+            ],
+            [
+                sg.Button("Block", key='block', disabled=True),
+                sg.Button("Hard block", key='hardblock', disabled=True),
+                sg.Button("Spam bot block", key='spambot', disabled=True),
+                sg.Button("Global block", key='gblock', disabled=True)
+            ],
+            [
+                sg.Text("CentralAuth")
+            ],
+            [
+                sg.Button("Lock", key='lock', disabled=True),
+                sg.Button("Unlock", key='unlock', disabled=True)
+            ],
+            [
+                sg.Text("Mass actions")
+            ],
+            [
+                sg.Button("Mass Block", key='massblock', disabled=True),
+                sg.Button("Mass Global Block", key='massgblock', disabled=True),
+                sg.Button("Mass Lock", key='masslock', disabled=True)
+            ],
+            [
+                sg.Text("Setup options")
+            ],
+            [
+                sg.Button("Setup OAuth", key='oauth'),
+                sg.Button("Add Project/API", key='addapi', disabled=True)
+            ],
+            [
+                sg.Text(
+                    "By Operator873",
+                    size=(60, 1),
+                    justification='r',
+                    font=("Helvetica", 8),
+                    text_color="light gray"
+                )
+            ]
+        ]
 
-    window = sg.Window("Steward/Sysop Action Module", layout)
+    sam_window = sg.Window("Steward/Sysop Action Module", layout)
 
     while True:
-        event, values = window.Read()
+        event, values = sam_window.Read()
         #  print("Event: " + event + " || Values: " + str(values)) # For debugging only
         if event == "Exit" or event == sg.WIN_CLOSED:
             break
@@ -131,6 +174,7 @@ def start_sam():
 
 
 def get_block():
+
     block_layout = [
         [
             sg.Text(
@@ -159,7 +203,9 @@ def get_block():
         ],
         [
             sg.Text("Enter duration:", size=(15, 1), justification='r'),
-            sg.InputText(key='duration')
+            sg.InputText(key='duration', size=(15, 1)),
+            sg.Text("Enter project:", size=(10, 1), justification='r'),
+            sg.InputText(key='project', default_text=sam.homewiki(), size=(15, 1))
         ],
         [
             sg.Submit(),
@@ -187,13 +233,21 @@ def get_block():
             if (
                     block_values['target'] == "" or
                     block_values['reason'] == "" or
-                    block_values['duration'] == ""
+                    block_values['duration'] == "" or
+                    block_values['project'] == ""
             ):
-                sg.Popup("All three fields are required!!")
+                sg.Popup("Target, reason, duration, and project are required!!", title="Input Error!")
+            elif block_values['project'].lower() == "examplewiki":
+                sg.Popup(
+                    "examplewiki is not a real wiki. Please select an appropriate project.",
+                    title="Project error!"
+                )
             else:
+                # sam.block(block_values)
                 sg.Popup(
                     block_values['target'] +
                     " would be blocked for " + block_values['duration'] +
+                    " on " + block_values['project'] +
                     " with reason: " + block_values['reason']
                 )
                 block_window.close()
@@ -201,6 +255,7 @@ def get_block():
 
 
 def get_hardblock():
+
     hblock_layout = [
         [
             sg.Text(
@@ -229,7 +284,9 @@ def get_hardblock():
         ],
         [
             sg.Text("Enter duration:", size=(15, 1), justification='r'),
-            sg.InputText(key='duration')
+            sg.InputText(key='duration', size=(15, 1)),
+            sg.Text("Enter project:", size=(10, 1), justification='r'),
+            sg.InputText(key='project', default_text=sam.homewiki(), size=(15, 1))
         ],
         [
             sg.Submit(),
@@ -257,10 +314,17 @@ def get_hardblock():
             if (
                     block_values['target'] == "" or
                     block_values['reason'] == "" or
-                    block_values['duration'] == ""
+                    block_values['duration'] == "" or
+                    block_values['project'] == ""
             ):
-                sg.Popup("All three fields are required!!")
+                sg.Popup("Target, reason, duration, and project are required!!", title="Input Error!")
+            elif block_values['project'].lower() == "examplewiki":
+                sg.Popup(
+                    "examplewiki is not a real wiki. Please select an appropriate project.",
+                    title="Project error!"
+                )
             else:
+                # sam.hardblock(block_values)
                 sg.Popup(
                     block_values['target'] +
                     " would be blocked for " + block_values['duration'] +
@@ -271,25 +335,75 @@ def get_hardblock():
 
 
 def get_spambot():  # todo Write get_spambot
-    layout = [
+
+    block_layout = [
         [
-            sg.Text("This will be the Spam bot interface")
+            sg.Text(
+                "Spambot Block",
+                font=("Helvetica", 25),
+                justification='c',
+                size=(25, 1),
+                text_color="red"
+            )
         ],
         [
-            sg.Exit()
+            sg.Text(
+                "Applies an indef block with no tpa or email access.",
+                size=(60, 1),
+                text_color="light gray",
+                justification='c'
+            )
+        ],
+        [
+            sg.Text("Enter account:", size=(15, 1), justification='r'),
+            sg.InputText(key='target')
+        ],
+        [
+            sg.Text("Enter project:", size=(15, 1), justification='r'),
+            sg.InputText(key='project', default_text=sam.homewiki(), size=(15, 1))
+        ],
+        [
+            sg.Submit(),
+            sg.Button("Cancel", key="stop"),
         ]
     ]
 
-    new_window = sg.Window("SAM: Apply Spam bot block", layout)
+    block_window = sg.Window("SAM: Apply Spambot block", block_layout)
 
     while True:
-        event, values = new_window.Read()
+        block_event, block_values = block_window.Read()
 
-        if event == "Exit" or event == sg.WIN_CLOSED:
+        if block_event == "Exit" or block_event == sg.WIN_CLOSED:
             break
-
-    new_window.close()
-
+        elif block_event == "stop":
+            block_window.close()
+            break
+        else:
+            if (
+                    block_values['target'] == "" or
+                    block_values['project'] == ""
+            ):
+                sg.Popup("Target and project are required!!", title="Input Error!")
+            elif block_values['project'].lower() == "examplewiki":
+                sg.Popup(
+                    "examplewiki is not a real wiki. Please select an appropriate project.",
+                    title="Project error!"
+                )
+            else:
+                result = sam.spambot(block_values)
+                if result['status'] == "Success":
+                    sg.Popup(
+                        result['message'],
+                        title="Block successful!"
+                    )
+                else:
+                    sg.Popup(
+                        "Error! " + result['message'] + " Please try again.",
+                        title="Block Failed!"
+                    )
+                block_window.close()
+                break
+######################################################################
 
 def get_lock():  # todo write get_lock
     layout = [
@@ -458,5 +572,5 @@ def get_addapi():  # todo write get_addapi
 
     new_window.close()
 
-
-main()
+if __name__ == "__main__":
+    main()
