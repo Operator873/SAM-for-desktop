@@ -322,10 +322,7 @@ def gblock(SAM, values):  # Globally blocks the provided IP
     return response
 
 
-def tpa(SAM, values):  # todo write tpa function
-    pass
-
-def reblock(SAM, values):  # todo write reblock function
+def reblock(SAM, values):  # Modifies an existing block
     response = {}
 
     creds = get_creds(SAM)

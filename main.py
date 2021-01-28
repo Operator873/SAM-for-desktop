@@ -1,5 +1,5 @@
 import PySimpleGUI as sg
-import SAMtools as sam # todo finish SAMtools
+import SAMtools as sam
 import configparser
 
 
@@ -704,7 +704,7 @@ def get_lock():  # GUI for globally locking an account
             break
 
 
-def get_unlock():  # todo write get_unlock
+def get_unlock():  # Unlocks an account
     unlock_layout = [
         [
             sg.Text(
@@ -887,7 +887,7 @@ def get_massgblock():  # todo write get_massgblock
     new_window.close()
 
 
-def get_oauth():  # todo write get_oauth
+def get_oauth():  # Adds new OAuth information to SAM.cfg
     oauth_layout = [
         [
             sg.Text(
@@ -974,7 +974,7 @@ def get_oauth():  # todo write get_oauth
     oauth_window.close()
 
 
-def get_addapi():  # todo write get_addapi
+def get_addapi():  # Adds an new project to the WIKIs file
     api_layout = [
         [
             sg.Text(
