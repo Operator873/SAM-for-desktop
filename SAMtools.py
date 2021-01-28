@@ -247,6 +247,7 @@ def lock(SAM, values):
 
     return response
 
+
 def unlock(SAM, values):
     response = {}
 
