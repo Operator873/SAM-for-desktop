@@ -4,7 +4,7 @@ import configparser
 
 
 SAM = configparser.ConfigParser()
-SAM.read('SAM.conf')
+SAM.read('SAM.cfg')
 
 def main():  # Initial window, disclaimer
 
@@ -961,7 +961,7 @@ def get_oauth():  # todo write get_oauth
                 SAM['OAuth']['access_token'] = values['a-token']
                 SAM['OAuth']['access_secret'] = values['a-secret']
 
-                with open('SAM.conf', 'w') as configfile:
+                with open('SAM.cfg', 'w') as configfile:
                     SAM.write(configfile)
 
                 sg.Popup(
