@@ -101,33 +101,6 @@ def spambot(SAM, values):
     return response
 
 
-def lock(values):
-    pass
-
-
-def gblock(values):
-    pass
-
-
-def massblock(values):
-    # Is this needed?
-    pass
-
-
-def masslock(values):
-    # Is this needed?
-    pass
-
-
-def massgblock(values):
-    # Is this needed?
-    pass
-
-
-def unlock(values):
-    pass
-
-
 def block(SAM, values):
     response = {}
 
@@ -148,11 +121,18 @@ def block(SAM, values):
         response['message'] = get_csrf['message']
         return response
 
+    if values['gs'] is True:
+        reason = values['reason'] + " ([[m:GS|Global sysop]] action)"
+    elif values['steward'] is True:
+        reason = values['reason'] + " ([[m:Steward|Steward]] action)"
+    else:
+        reason = values['reason']
+
     do_block = {
         "action": "block",
         "user": values['target'],
         "expiry": adjust(values['duration']),
-        "reason": values['reason'],
+        "reason": reason,
         "token": token,
         "allowusertalk": "",
         "nocreate": "",
@@ -176,7 +156,147 @@ def block(SAM, values):
     return response
 
 
-def hardblock(values):
+def hardblock(SAM, values):
+    response = {}
+
+    creds = get_creds(SAM)
+
+    try:
+        api = WIKIS[values['project']]
+    except Exception as e:
+        response['status'] = "Failed"
+        response['message'] = values['project'] + " is not known. Please add via AddApi on main menu."
+        return response
+
+    get_csrf = getCSRF(api, creds, 'csrf')
+    if get_csrf['result'] == "Success":
+        token = get_csrf['token']
+    else:
+        response['status'] = "Failed"
+        response['message'] = get_csrf['message']
+        return response
+
+    if values['gs'] is True:
+        reason = values['reason'] + " ([[m:GS|Global sysop]] action)"
+    elif values['steward'] is True:
+        reason = values['reason'] + " ([[m:Steward|Steward]] action)"
+    else:
+        reason = values['reason']
+
+    do_block = {
+        "action": "block",
+        "user": values['target'],
+        "expiry": adjust(values['duration']),
+        "reason": reason,
+        "token": token,
+        "noemail": "",
+        "nocreate": "",
+        "autoblock": "",
+        "format": "json"
+    }
+
+    data = xmit(api, creds, do_block, 'post')
+
+    if 'error' in data:
+        response['status'] = "Error"
+        response['message'] = data['error']['code'] + " " + data['error']['info']
+        return response
+    elif 'block' in data:
+        response['status'] = "Success"
+        response['message'] = data['block']['user'] + " was blocked until " + data['block'][
+            'expiry'] + " with reason: " + data['block']['reason']
+    else:
+        response['status'] = "Unk"
+        response['message'] = data
+
+    return response
+
+
+def lock(SAM, values):
+    response = {}
+
+    creds = get_creds(SAM)
+
+    api = "https://meta.wikimedia.org/w/api.php"
+
+    get_csrf = getCSRF(api, creds, 'setglobalaccountstatus')
+    if get_csrf['result'] == "Success":
+        token = get_csrf['token']
+    else:
+        response['status'] = "Failed"
+        response['message'] = get_csrf['message']
+        return response
+
+    lockRequest = {
+        "action": "setglobalaccountstatus",
+        "format": "json",
+        "user": values['target'],
+        "locked": "lock",
+        "reason": values['reason'],
+        "token": token
+    }
+
+    lock = xmit(api, creds, lockRequest, "post")
+
+    if 'error' in lock:
+        response['status'] = "Failed"
+        response['message'] = lock['error']['info']
+    else:
+        response['status'] = "Success"
+        response['message'] = values['target'] + " locked."
+
+    return response
+
+def unlock(SAM, values):
+    response = {}
+
+    creds = get_creds(SAM)
+
+    api = "https://meta.wikimedia.org/w/api.php"
+
+    get_csrf = getCSRF(api, creds, 'setglobalaccountstatus')
+    if get_csrf['result'] == "Success":
+        token = get_csrf['token']
+    else:
+        response['status'] = "Failed"
+        response['message'] = get_csrf['message']
+        return response
+
+    unlockRequest = {
+        "action": "setglobalaccountstatus",
+        "format": "json",
+        "user": values['target'],
+        "locked": "unlock",
+        "reason": values['reason'],
+        "token": token
+    }
+
+    lock = xmit(api, creds, unlockRequest, "post")
+
+    if 'error' in lock:
+        response['status'] = "Failed"
+        response['message'] = lock['error']['info']
+    else:
+        response['status'] = "Success"
+        response['message'] = values['target'] + " unlocked."
+
+
+def gblock(values):
+    pass
+
+
+def massblock(values):
+    # Is this needed?
+    pass
+
+
+def masslock(values):
+    # Is this needed?
+    pass
+
+
+def massgblock(values):
+    # Is this needed?
     pass
 
 

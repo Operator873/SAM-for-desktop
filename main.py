@@ -6,7 +6,7 @@ import configparser
 SAM = configparser.ConfigParser()
 SAM.read('SAM.cfg')
 
-def main():
+def main():  # Initial window, disclaimer
 
     layout = [
         [
@@ -54,7 +54,7 @@ def main():
     start_sam()
 
 
-def start_sam():
+def start_sam():  # Main menu window
     
     if (
         SAM['OAuth']['consumer_token'] != "" and
@@ -80,12 +80,12 @@ def start_sam():
                 sg.Button("Unlock", key='unlock')
             ],
             [
-                sg.Text("Mass actions")
+                sg.Text("Mass actions (Coming soon)")
             ],
             [
-                sg.Button("Mass Block", key='massblock'),
-                sg.Button("Mass Global Block", key='massgblock'),
-                sg.Button("Mass Lock", key='masslock')
+                sg.Button("Mass Block", key='massblock', disabled=True),
+                sg.Button("Mass Global Block", key='massgblock', disabled=True),
+                sg.Button("Mass Lock", key='masslock', disabled=True)
             ],
             [
                 sg.Text("Setup options")
@@ -183,7 +183,7 @@ def start_sam():
             sg.Popup("An unknown selection was received. Try again.", title="Unknown error!")
 
 
-def get_block():
+def get_block():  # GUI for executing a regular block
 
     block_layout = [
         [
@@ -220,10 +220,14 @@ def get_block():
         [
             sg.Submit(),
             sg.Button("Cancel", key="stop"),
+            sg.Checkbox('Global Sysop action', default=False, key='gs'),
+            sg.Checkbox('Steward action', default=False, key='steward')
+        ],
+        [
             sg.Text(
                 "Valid duration examples: 3 days, 5months, indef, forever",
-                size=(42, 1),
-                justification='r',
+                size=(60, 1),
+                justification='c',
                 text_color="blue"
             )
         ]
@@ -262,7 +266,7 @@ def get_block():
                 break
 
 
-def get_hardblock():
+def get_hardblock():  # GUI for executing a hard block
 
     hblock_layout = [
         [
@@ -299,10 +303,14 @@ def get_hardblock():
         [
             sg.Submit(),
             sg.Button("Cancel", key="stop"),
+            sg.Checkbox('Global Sysop action', default=False, key='gs'),
+            sg.Checkbox('Steward action', default=False, key='steward')
+        ],
+        [
             sg.Text(
                 "Valid duration examples: 3 days, 5months, indef, forever",
-                size=(42, 1),
-                justification='r',
+                size=(60, 1),
+                justification='c',
                 text_color="blue"
             )
         ]
@@ -331,18 +339,28 @@ def get_hardblock():
                     "examplewiki is not a real wiki. Please select an appropriate project.",
                     title="Project error!"
                 )
-            else:
-                # sam.hardblock(block_values)
+            elif block_values['gs'] is True and block_values['steward'] is True:
                 sg.Popup(
-                    block_values['target'] +
-                    " would be blocked for " + block_values['duration'] +
-                    " with reason: " + block_values['reason']
+                    "Please only select Global sysop action or Steward action, not both.",
+                    title="Error!"
                 )
+            else:
+                result = sam.hardblock(SAM, block_values)
+                if result['status'] == "Success":
+                    sg.Popup(
+                        result['message'],
+                        title="Block successful!"
+                    )
+                else:
+                    sg.Popup(
+                        "Error! " + result['message'] + " Please try again.",
+                        title="Block Failed!"
+                    )
                 hblock_window.close()
                 break
 
 
-def get_spambot():  # todo Write get_spambot
+def get_spambot():  # GUI for blocking Spambot
 
     block_layout = [
         [
@@ -373,7 +391,8 @@ def get_spambot():  # todo Write get_spambot
         [
             sg.Submit(),
             sg.Button("Cancel", key="stop"),
-            sg.Checkbox('Mark as Global Sysop action', default=False, key='gs')
+            sg.Checkbox('Global Sysop action', default=False, key='gs'),
+            sg.Checkbox('Steward action', default=False, key='steward')
         ]
     ]
 
@@ -413,26 +432,122 @@ def get_spambot():  # todo Write get_spambot
                 block_window.close()
                 break
 
-def get_lock():  # todo write get_lock
-    layout = [
+def get_lock():  # GUI for globally locking an account
+    lock_layout = [
         [
-            sg.Text("This will be the Lock interface")
+            sg.Text(
+                "Lock Account",
+                font=("Helvetica", 25),
+                justification='c',
+                size=(25, 1),
+                text_color="red"
+            )
         ],
         [
-            sg.Exit()
+            sg.Text(
+                "Locks the account.",
+                size=(60, 1),
+                text_color="light gray",
+                justification='c'
+            )
+        ],
+        [
+            sg.Text("Enter account:", size=(15, 1), justification='r'),
+            sg.InputText(key='target')
+        ],
+        [
+            sg.Text("Enter reason:", size=(15, 1), justification='r'),
+            sg.InputText(key='reason')
+        ],
+        [
+            sg.Submit(),
+            sg.Button("Cancel", key="stop")
         ]
     ]
 
-    new_window = sg.Window("SAM: Apply Lock", layout)
+    lock_window = sg.Window("SAM: Lock account", lock_layout)
 
     while True:
-        event, values = new_window.Read()
+        lock_event, lock_values = lock_window.Read()
 
-        if event == "Exit" or event == sg.WIN_CLOSED:
+        if lock_event == "Exit" or lock_event == sg.WIN_CLOSED:
+            break
+        elif lock_event == "stop":
+            lock_window.close()
+            break
+        else:
+            result = sam.lock(SAM, lock_values)
+            if result['status'] == "Success":
+                sg.Popup(
+                    result['message'],
+                    title="Lock successful!"
+                )
+            else:
+                sg.Popup(
+                    "Error! " + result['message'] + " Please try again.",
+                    title="Lock Failed!"
+                )
+            lock_window.close()
             break
 
-    new_window.close()
 
+def get_unlock():  # todo write get_unlock
+    unlock_layout = [
+        [
+            sg.Text(
+                "Unlock Account",
+                font=("Helvetica", 25),
+                justification='c',
+                size=(25, 1),
+                text_color="red"
+            )
+        ],
+        [
+            sg.Text(
+                "Unlocks the account.",
+                size=(60, 1),
+                text_color="light gray",
+                justification='c'
+            )
+        ],
+        [
+            sg.Text("Enter account:", size=(15, 1), justification='r'),
+            sg.InputText(key='target')
+        ],
+        [
+            sg.Text("Enter reason:", size=(15, 1), justification='r'),
+            sg.InputText(key='reason')
+        ],
+        [
+            sg.Submit(),
+            sg.Button("Cancel", key="stop")
+        ]
+    ]
+
+    unlock_window = sg.Window("SAM: Unlock account", unlock_layout)
+
+    while True:
+        unlock_event, unlock_values = unlock_window.Read()
+
+        if unlock_event == "Exit" or unlock_event == sg.WIN_CLOSED:
+            break
+        elif unlock_event == "stop":
+            unlock_window.close()
+            break
+        else:
+            result = sam.lock(SAM, unlock_values)
+            if result['status'] == "Success":
+                sg.Popup(
+                    result['message'],
+                    title="Unlock successful!"
+                )
+            else:
+                sg.Popup(
+                    "Error! " + result['message'] + " Please try again.",
+                    title="Unlock Failed!"
+                )
+            unlock_window.close()
+            break
 
 def get_globalblock():  # todo write get_globalblock
     layout = [
@@ -508,27 +623,6 @@ def get_massgblock():  # todo write get_massgblock
     ]
 
     new_window = sg.Window("SAM: Apply mass global block", layout)
-
-    while True:
-        event, values = new_window.Read()
-
-        if event == "Exit" or event == sg.WIN_CLOSED:
-            break
-
-    new_window.close()
-
-
-def get_unlock():  # todo write get_unlock
-    layout = [
-        [
-            sg.Text("This will be the Unlock interface")
-        ],
-        [
-            sg.Exit()
-        ]
-    ]
-
-    new_window = sg.Window("SAM: Apply Unlock", layout)
 
     while True:
         event, values = new_window.Read()
