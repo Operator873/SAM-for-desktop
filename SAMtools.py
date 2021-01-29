@@ -119,11 +119,12 @@ def block(SAM, values):  # Execute a typical block
         response['message'] = get_csrf['message']
         return response
 
-    if values['gs'] is True:
-        reason = values['reason'] + " ([[m:GS|Global sysop]] action)"
-    elif values['steward'] is True:
-        reason = values['reason'] + " ([[m:Steward|Steward]] action)"
-    else:
+    try:
+        if values['gs'] is True:
+            reason = values['reason'] + " ([[m:GS|Global sysop]] action )"
+        elif values['steward'] is True:
+            reason = values['reason'] + " ([[m:Steward|Steward]] action )"
+    except:
         reason = values['reason']
 
     do_block = {
@@ -476,3 +477,13 @@ def adjust(duration):  # Adjusts expiry format to allow for stupid and fat finge
     adjusted = re.sub(' +', ' ', adjust).strip()
 
     return adjusted
+
+
+def testrun(SAM, values):
+
+    response = {}
+
+    response['status'] = "Failed"
+    response['message'] = values
+
+    return response

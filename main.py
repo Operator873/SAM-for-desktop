@@ -90,7 +90,7 @@ def start_sam():  # Main menu window
                 sg.Text("Mass actions (Coming soon)")
             ],
             [
-                sg.Button("Mass Block", key='massblock', disabled=True),
+                sg.Button("Mass Block", key='massblock'),
                 sg.Button("Mass Global Block", key='massgblock', disabled=True),
                 sg.Button("Mass Lock", key='masslock', disabled=True)
             ],
@@ -181,6 +181,7 @@ def start_sam():  # Main menu window
         elif event == "masslock":
             get_masslock()
         elif event == "oauth":
+            sam_window.close()
             get_oauth()
         elif event == "addapi":
             get_addapi()
@@ -226,7 +227,7 @@ def get_block():  # GUI for executing a regular block
             sg.Text("Enter duration:", size=(15, 1), justification='r'),
             sg.InputText(key='duration', size=(15, 1)),
             sg.Text("Enter project:", size=(10, 1), justification='r'),
-            sg.InputText(key='project', default_text=SAM['HomeWiki']['homewiki'], size=(15, 1))
+            sg.InputText(key='project', default_text=SAM['Settings']['homewiki'], size=(15, 1))
         ],
         [
             sg.Submit(),
@@ -309,7 +310,7 @@ def get_hardblock():  # GUI for executing a hard block
             sg.Text("Enter duration:", size=(15, 1), justification='r'),
             sg.InputText(key='duration', size=(15, 1)),
             sg.Text("Enter project:", size=(10, 1), justification='r'),
-            sg.InputText(key='project', default_text=SAM['HomeWiki']['homewiki'], size=(15, 1))
+            sg.InputText(key='project', default_text=SAM['Settings']['homewiki'], size=(15, 1))
         ],
         [
             sg.Submit(),
@@ -397,7 +398,7 @@ def get_spambot():  # GUI for blocking Spambot
         ],
         [
             sg.Text("Enter project:", size=(15, 1), justification='r'),
-            sg.InputText(key='project', default_text=SAM['HomeWiki']['homewiki'], size=(15, 1))
+            sg.InputText(key='project', default_text=SAM['Settings']['homewiki'], size=(15, 1))
         ],
         [
             sg.Submit(),
@@ -825,24 +826,179 @@ def get_globalblock():  # Globally blocks provided IP address with reason/durati
 
 
 def get_massblock():  # todo write get_massblock
-    layout = [
+    data = []
+
+    left = [
         [
-            sg.Text("This will be the mass block interface")
+            sg.Text(
+                "Account/IP to block",
+                size=(15, 1)
+            )
         ],
         [
-            sg.Exit()
+            sg.InputText(
+                key='target',
+                size=(30, 1)
+            )
+        ],
+        [
+            sg.Button("Block All", key='_done_'),
+            sg.Cancel(key='stop')
+
+        ],
+        [
+            sg.Checkbox('Global Sysop action', default=False, key='gs'),
+            sg.Checkbox('Steward action', default=False, key='steward')
         ]
     ]
 
-    new_window = sg.Window("SAM: Apply mass blocks", layout)
+    center = [
+        [
+            sg.Button(">", key="_add_", bind_return_key=True)
+        ],
+        [
+            sg.Button("<", key="_rmv_")
+        ]
+    ]
+
+    right = [
+        [
+            sg.Listbox(
+                data,
+                size=(30, 10),
+                key='thelist',
+                enable_events=True
+            )
+        ],
+        [
+            sg.InputText(
+                key='project',
+                default_text=SAM['Settings']['homewiki'],
+                size=(15, 1)
+            ),
+            sg.InputText(
+                key='duration',
+                default_text="Duration",
+                size=(15, 1)
+            )
+        ],
+        [
+            sg.InputText(
+                key='reason',
+                default_text="Reason",
+                size=(32, 1)
+            )
+        ]
+    ]
+
+    layout = [[
+        sg.Column(left),
+        sg.VerticalSeparator(),
+        sg.Column(center),
+        sg.VerticalSeparator(),
+        sg.Column(right)
+    ]]
+
+    mass_window = sg.Window('Mass block', layout)
 
     while True:
-        event, values = new_window.Read()
+        event, values = mass_window.read()
 
-        if event == "Exit" or event == sg.WIN_CLOSED:
+        if (
+                event == "Exit" or
+                event == sg.WIN_CLOSED or
+                event == "stop"
+        ):
             break
 
-    new_window.close()
+        elif event == "_add_":
+            if values['target'] in data:
+                sg.Popup(
+                    "That is already in the list."
+                )
+                mass_window.FindElement('target').Update("")
+            elif values['target'].strip() == "":
+                mass_window.FindElement('target').Update("")
+            else:
+                data.append(values['target'])
+                mass_window.FindElement('target').Update("")
+                mass_window.FindElement('thelist').Update(data)
+
+        elif event == "thelist":
+            rmv_target = values['thelist'][0]
+
+        elif event == "_rmv_":
+
+            try:
+                data.remove(rmv_target)
+            except UnboundLocalError:
+                continue
+            except ValueError:
+                continue
+            finally:
+                mass_window.FindElement('thelist').Update(data)
+
+        elif event == "_done_":
+
+            if values['project'] == "" or values['project'] == "examplewiki":
+                sg.Popup(
+                    "Please enter a valid project for the mass block...",
+                    title="Project not valid!"
+                )
+                continue
+            elif (
+                values['reason'] == "" or
+                values['reason'] == "Reason" or
+                values['duration'] == "" or
+                values['duration'] == "Duration"
+            ):
+                sg.Popup(
+                    "Please check your reason and duration...",
+                    title="Error!"
+                )
+                continue
+            elif len(data) == 0:
+                sg.Popup(
+                    "No accounts to block! Nothing to do...",
+                    title="Error!"
+                )
+                continue
+
+            targets = ", "
+
+            if sg.popup_yes_no(
+                    "Accounts to block: " + targets.join(data)
+            ) == "Yes":
+
+                for item in data:
+                    values['target'] = item
+
+                    resp = sam.block(SAM, values)
+
+                    if resp['status'] == "Error":
+                        sg.Popup(
+                            resp['status'] + " " + resp['message'],
+                            title="Error!"
+                        )
+
+                data = []
+                mass_window.FindElement('thelist').Update(data)
+                mass_window.FindElement('target').Update("")
+
+                sg.Popup(
+                    "Mass block complete.",
+                    title="Complete!"
+                )
+
+            else:
+                if sg.popup_yes_no(
+                        "Keep current list?"
+                ) == "No":
+                    data = []
+                    mass_window.FindElement('thelist').Update(data)
+                    mass_window.FindElement('target').Update("")
+
+    mass_window.close()
 
 
 def get_masslock():  # todo write get_masslock
@@ -972,6 +1128,8 @@ def get_oauth():  # Adds new OAuth information to SAM.cfg
                 break
 
     oauth_window.close()
+
+    start_sam()
 
 
 def get_addapi():  # Adds an new project to the WIKIs file
