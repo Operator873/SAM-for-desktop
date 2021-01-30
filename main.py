@@ -56,104 +56,7 @@ def main():  # Initial window, disclaimer
 
 def start_sam():  # Main menu window
     
-    if (
-        SAM['OAuth']['consumer_token'] != "" and
-        SAM['OAuth']['consumer_secret'] != "" and
-        SAM['OAuth']['access_token'] != "" and
-        SAM['OAuth']['access_secret'] != ""
-    ):
-        layout = [
-            [
-                sg.Text("Blocks")
-            ],
-            [
-                sg.Button("Block", key='block'),
-                sg.Button("Hard block", key='hardblock'),
-                sg.Button("Spam bot block", key='spambot'),
-                sg.Button("Global block", key='gblock')
-            ],
-            [
-                sg.Text("Modify a block")
-            ],
-            [
-                sg.Button("Change block", key='reblock'),
-                sg.Button("Revoke TPA", key='tpa')
-            ],
-            [
-                sg.Text("CentralAuth")
-            ],
-            [
-                sg.Button("Lock", key='lock'),
-                sg.Button("Unlock", key='unlock')
-            ],
-            [
-                sg.Text("Mass actions (Coming soon)")
-            ],
-            [
-                sg.Button("Mass Block", key='massblock'),
-                sg.Button("Mass Global Block", key='massgblock', disabled=True),
-                sg.Button("Mass Lock", key='masslock', disabled=True)
-            ],
-            [
-                sg.Text("Setup options")
-            ],
-            [
-                sg.Button("Setup OAuth", key='oauth'),
-                sg.Button("Add Project/API", key='addapi')
-            ],
-            [
-                sg.Text(
-                    "By Operator873",
-                    size=(60, 1),
-                    justification='r',
-                    font=("Helvetica", 8),
-                    text_color="light gray"
-                )
-            ]
-        ]
-    else:
-        layout = [
-            [
-                sg.Text("Blocks")
-            ],
-            [
-                sg.Button("Block", key='block', disabled=True),
-                sg.Button("Hard block", key='hardblock', disabled=True),
-                sg.Button("Spam bot block", key='spambot', disabled=True),
-                sg.Button("Global block", key='gblock', disabled=True)
-            ],
-            [
-                sg.Text("CentralAuth")
-            ],
-            [
-                sg.Button("Lock", key='lock', disabled=True),
-                sg.Button("Unlock", key='unlock', disabled=True)
-            ],
-            [
-                sg.Text("Mass actions")
-            ],
-            [
-                sg.Button("Mass Block", key='massblock', disabled=True),
-                sg.Button("Mass Global Block", key='massgblock', disabled=True),
-                sg.Button("Mass Lock", key='masslock', disabled=True)
-            ],
-            [
-                sg.Text("Setup options")
-            ],
-            [
-                sg.Button("Setup OAuth", key='oauth'),
-                sg.Button("Add Project/API", key='addapi', disabled=True)
-            ],
-            [
-                sg.Text(
-                    "By Operator873",
-                    size=(60, 1),
-                    justification='r',
-                    font=("Helvetica", 8),
-                    text_color="light gray"
-                )
-            ]
-        ]
+    layout = sam.build_sam(SAM)
 
     sam_window = sg.Window("Steward/Sysop Action Module", layout)
 
@@ -189,6 +92,11 @@ def start_sam():  # Main menu window
             get_reblock()
         elif event == "tpa":
             get_revoketpa()
+        elif event == "modgblock":
+            get_modgblock()
+        elif event == "setup":
+            sam_window.close()
+            get_setup()
         elif event == "":
             sg.Popup("You kinda have to chose something...", title="PEBKAC Error!")
         else:
@@ -232,8 +140,8 @@ def get_block():  # GUI for executing a regular block
         [
             sg.Submit(),
             sg.Button("Cancel", key="stop"),
-            sg.Checkbox('Global Sysop action', default=False, key='gs'),
-            sg.Checkbox('Steward action', default=False, key='steward')
+            sg.Checkbox('Global Sysop action', default=False, key='gs', disabled=sam.check_gs(SAM)),
+            sg.Checkbox('Steward action', default=False, key='steward', disabled=sam.check_stew(SAM))
         ],
         [
             sg.Text(
@@ -315,8 +223,8 @@ def get_hardblock():  # GUI for executing a hard block
         [
             sg.Submit(),
             sg.Button("Cancel", key="stop"),
-            sg.Checkbox('Global Sysop action', default=False, key='gs'),
-            sg.Checkbox('Steward action', default=False, key='steward')
+            sg.Checkbox('Global Sysop action', default=False, key='gs', disabled=sam.check_gs(SAM)),
+            sg.Checkbox('Steward action', default=False, key='steward', disabled=sam.check_stew(SAM))
         ],
         [
             sg.Text(
@@ -403,8 +311,8 @@ def get_spambot():  # GUI for blocking Spambot
         [
             sg.Submit(),
             sg.Button("Cancel", key="stop"),
-            sg.Checkbox('Global Sysop action', default=False, key='gs'),
-            sg.Checkbox('Steward action', default=False, key='steward')
+            sg.Checkbox('Global Sysop action', default=False, key='gs', disabled=sam.check_gs(SAM)),
+            sg.Checkbox('Steward action', default=False, key='steward', disabled=sam.check_stew(SAM))
         ]
     ]
 
@@ -537,8 +445,8 @@ def do_reblock(info):
         [
             sg.Submit(),
             sg.Button("Cancel", key="stop"),
-            sg.Checkbox('Global Sysop action', default=False, key='gs'),
-            sg.Checkbox('Steward action', default=False, key='steward')
+            sg.Checkbox('Global Sysop action', default=False, key='gs', disabled=sam.check_gs(SAM)),
+            sg.Checkbox('Steward action', default=False, key='steward', disabled=sam.check_stew(SAM))
         ],
         [
             sg.Text(
@@ -581,12 +489,16 @@ def do_reblock(info):
 def get_revoketpa():
     intel = [
         [
-            sg.Text("Account:", size=(12, 1), justification='r'),
-            sg.InputText(key='target', size=(20, 1))
+            sg.Text("Account:", size=(11, 1), justification='r'),
+            sg.InputText(key='target', size=(25, 1))
         ],
         [
-            sg.Text("Project:", size=(12, 1), justification='r'),
-            sg.InputText(key='project', size=(20, 1))
+            sg.Text("Project:", size=(11, 1), justification='r'),
+            sg.InputText(key='project', size=(25, 1))
+        ],
+        [
+            sg.Checkbox('Global Sysop action', default=False, key='gs', disabled=sam.check_gs(SAM)),
+            sg.Checkbox('Steward action', default=False, key='steward', disabled=sam.check_stew(SAM))
         ],
         [
             sg.Submit(),
@@ -635,7 +547,9 @@ def do_revoketpa(info, values):
         'target': values['target'],
         'duration': info['message']['expiry'],
         'reason': tpa_reason,
-        'notpa': True
+        'notpa': True,
+        'gs': values['gs'],
+        'steward': values['steward']
     }
 
     work = sam.reblock(SAM, block_values)
@@ -847,8 +761,8 @@ def get_massblock():  # todo write get_massblock
 
         ],
         [
-            sg.Checkbox('Global Sysop action', default=False, key='gs'),
-            sg.Checkbox('Steward action', default=False, key='steward')
+            sg.Checkbox('Global Sysop action', default=False, key='gs', disabled=sam.check_gs(SAM)),
+            sg.Checkbox('Steward action', default=False, key='steward', disabled=sam.check_stew(SAM))
         ]
     ]
 
@@ -1202,6 +1116,86 @@ def get_addapi():  # Adds an new project to the WIKIs file
             break
 
     api_window.close()
+
+
+def get_setup():
+
+    s = sam.fetch_setup(SAM)
+
+    is_gs = s['is_globalsysop']
+    is_s = s['is_steward']
+
+    layout = [
+        [
+            sg.Text("Account Name:"),
+            sg.InputText(key='account', default_text=s['account_name'])
+        ],
+        [
+            sg.Text("Home wiki:"),
+            sg.InputText(key='wiki', default_text=s['homewiki'])
+        ],
+        [
+            sg.Text("I am a Global sysop:"),
+            sg.Radio("Yes", "gs", default=is_gs, key='gs'),
+            sg.Radio("No", "gs", default=not is_gs)
+        ],
+        [
+            sg.Text("I am a Steward:"),
+            sg.Radio("Yes", "stew", default=is_s, key='stew'),
+            sg.Radio("No", "stew", default=not is_s)
+        ],
+        [
+            sg.Button("Save", key='save'),
+            sg.Cancel()
+        ]
+    ]
+
+    setup_window = sg.Window("Setup options", layout)
+
+    while True:
+        event, values = setup_window.Read()
+
+        if (
+            event == "Exit" or
+            event == sg.WIN_CLOSED or
+            event == "Cancel"
+        ):
+            break
+
+        elif event == 'save':
+            if sg.popup_yes_no(
+                "Are you sure you want to save?",
+                title="Confirm?"
+            ) == "Yes":
+                if values['gs'] is True:
+                    SAM['Settings']['is_globalsysop'] = "Yes"
+                else:
+                    SAM['Settings']['is_globalsysop'] = "No"
+
+                if values['stew'] is True:
+                    SAM['Settings']['is_steward'] = "Yes"
+                else:
+                    SAM['Settings']['is_steward'] = "No"
+
+                SAM['Settings']['homewiki'] = values['wiki']
+                SAM['Settings']['account_name'] = values['account']
+
+                with open('SAM.cfg', 'w') as f:
+                    SAM.write(f)
+
+                sg.Popup(
+                    "Settings saved",
+                    title="Saved!"
+                )
+
+                break
+
+    setup_window.close()
+
+    start_sam()
+
+def get_modgblock():
+    pass
 
 if __name__ == "__main__":
     main()

@@ -1,3 +1,4 @@
+import PySimpleGUI as sg
 import requests
 from requests_oauthlib import OAuth1
 import json
@@ -124,6 +125,8 @@ def block(SAM, values):  # Execute a typical block
             reason = values['reason'] + " ([[m:GS|Global sysop]] action )"
         elif values['steward'] is True:
             reason = values['reason'] + " ([[m:Steward|Steward]] action )"
+        else:
+            reason = values['reason']
     except:
         reason = values['reason']
 
@@ -487,3 +490,181 @@ def testrun(SAM, values):
     response['message'] = values
 
     return response
+
+
+def build_sam(SAM):
+
+    stew = check_stew(SAM)
+
+    if (
+        SAM['OAuth']['consumer_token'] != "" and
+        SAM['OAuth']['consumer_secret'] != "" and
+        SAM['OAuth']['access_token'] != "" and
+        SAM['OAuth']['access_secret'] != ""
+    ):
+        layout = [
+            [
+                sg.Text("Local actions")
+            ],
+            [
+                sg.Button("Block", key='block'),
+                sg.Button("Hard block", key='hardblock'),
+                sg.Button("Spam bot block", key='spambot'),
+                sg.Button("Change block", key='reblock'),
+                sg.Button("Revoke TPA", key='tpa')
+
+            ],
+            [
+                sg.Text("Global actions")
+            ],
+            [
+                sg.Button("Lock", key='lock', disabled=stew),
+                sg.Button("Unlock", key='unlock', disabled=stew),
+                sg.Button("Global block", key='gblock', disabled=stew),
+                sg.Button("Modify global block", key='modgblock', disabled=stew)
+            ],
+            [
+                sg.Text("Mass actions (Coming soon)")
+            ],
+            [
+                sg.Button("Mass Block", key='massblock'),
+                sg.Button("Mass Lock", key='masslock', disabled=True),
+                sg.Button("Mass Global Block", key='massgblock', disabled=True)
+
+            ],
+            [
+                sg.Text("Setup options")
+            ],
+            [
+                sg.Button("Setup", key='setup'),
+                sg.Button("Set OAuth", key='oauth'),
+                sg.Button("Add Project/API", key='addapi')
+            ],
+            [
+                sg.Text(
+                    "By Operator873",
+                    size=(70, 1),
+                    justification='r',
+                    font=("Helvetica", 8),
+                    text_color="light gray"
+                )
+            ]
+        ]
+    else:
+        layout = [
+            [
+                sg.Text("Local actions")
+            ],
+            [
+                sg.Button("Block", key='block', disabled=True),
+                sg.Button("Hard block", key='hardblock', disabled=True),
+                sg.Button("Spam bot block", key='spambot', disabled=True,),
+                sg.Button("Change block", key='reblock', disabled=True),
+                sg.Button("Revoke TPA", key='tpa', disabled=True)
+            ],
+            [
+                sg.Text("Global actions")
+            ],
+            [
+                sg.Button("Lock", key='lock', disabled=True),
+                sg.Button("Unlock", key='unlock', disabled=True),
+                sg.Button("Global block", key='gblock', disabled=True),
+                sg.Button("Modify global block", key='modgblock', disabled=True)
+            ],
+            [
+                sg.Text("Mass actions (Coming soon)")
+            ],
+            [
+                sg.Button("Mass Block", key='massblock', disabled=True),
+                sg.Button("Mass Lock", key='masslock', disabled=True),
+                sg.Button("Mass Global Block", key='massgblock', disabled=True)
+
+            ],
+            [
+                sg.Text("Setup options")
+            ],
+            [
+                sg.Button("Setup", key='setup'),
+                sg.Button("Set OAuth", key='oauth'),
+                sg.Button("Add Project/API", key='addapi', disabled=True)
+            ],
+            [
+                sg.Text(
+                    "By Operator873",
+                    size=(70, 1),
+                    justification='r',
+                    font=("Helvetica", 8),
+                    text_color="light gray"
+                )
+            ]
+        ]
+
+    return layout
+
+
+def fetch_setup(SAM):
+
+    settings = {}
+
+    if (
+        SAM.has_option('Settings', 'homewiki') and
+        SAM['Settings']['homewiki'] != ""
+    ):
+        settings['homewiki'] = SAM['Settings']['homewiki']
+    else:
+        settings['homewiki'] = "examplewiki"
+
+    if (
+        SAM.has_option('Settings', 'account_name') and
+        SAM['Settings']['account_name'] != ""
+    ):
+        settings['account_name'] = SAM['Settings']['account_name']
+    else:
+        settings['account_name'] = "Your account name"
+
+    if SAM.has_option('Settings', 'is_globalsysop'):
+        if SAM['Settings']['is_globalsysop'] == "Yes":
+            settings['is_globalsysop'] = True
+        else:
+            settings['is_globalsysop'] = False
+    else:
+        settings['is_globalsysop'] = False
+
+    if SAM.has_option('Settings', 'is_steward'):
+        if SAM['Settings']['is_steward'] == "Yes":
+            settings['is_steward'] = True
+        else:
+            settings['is_steward'] = False
+    else:
+        settings['is_steward'] = False
+
+    return settings
+
+def check_gs(SAM):
+    if (
+        SAM.has_option('Settings', 'is_globalsysop') and
+        SAM['Settings']['is_globalsysop'] != ""
+    ):
+        if SAM['Settings']['is_globalsysop'][0].lower() == 'y':
+            r = False
+        else:
+            r = True
+    else:
+        r = True
+
+    return r
+
+
+def check_stew(SAM):
+    if (
+        SAM.has_option('Settings', 'is_steward') and
+        SAM['Settings']['is_steward'] != ""
+    ):
+        if SAM['Settings']['is_steward'][0].lower() == 'y':
+            r = False
+        else:
+            r = True
+    else:
+        r = True
+
+    return r
