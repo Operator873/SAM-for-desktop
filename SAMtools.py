@@ -396,20 +396,6 @@ def reblock(SAM, values):  # Modifies an existing block
 
     return response
 
-def massblock(values):  # todo write or eliminate massblock
-    # Is this needed?
-    pass
-
-
-def masslock(values):  # todo write or eliminate masslock
-    # Is this needed?
-    pass
-
-
-def massgblock(values):  # todo write or eliminate massgblock
-    # Is this needed?
-    pass
-
 
 def blockinfo(creds, values):  # Determines if an account or IP is currently blocked
     response = {}
