@@ -739,7 +739,7 @@ def get_globalblock():  # Globally blocks provided IP address with reason/durati
             break
 
 
-def get_massblock():  # todo write get_massblock
+def get_massblock():  # This gathers the information for and processes a mass block on a single project
     data = []
 
     left = [
@@ -915,46 +915,318 @@ def get_massblock():  # todo write get_massblock
     mass_window.close()
 
 
-def get_masslock():  # todo write get_masslock
-    layout = [
+def get_masslock():  # Process a mass lock
+    data = []
+
+    left = [
         [
-            sg.Text("This will be the Mass lock interface")
+            sg.Text(
+                "Account to lock",
+                size=(15, 1)
+            )
         ],
         [
-            sg.Exit()
+            sg.InputText(
+                key='target',
+                size=(30, 1)
+            )
+        ],
+        [
+            sg.Button("Lock All", key='_done_'),
+            sg.Cancel(key='stop')
+
         ]
     ]
 
-    new_window = sg.Window("SAM: Apply mass locks", layout)
-
-    while True:
-        event, values = new_window.Read()
-
-        if event == "Exit" or event == sg.WIN_CLOSED:
-            break
-
-    new_window.close()
-
-
-def get_massgblock():  # todo write get_massgblock
-    layout = [
+    center = [
         [
-            sg.Text("This will be the mass global block interface")
+            sg.Button(">", key="_add_", bind_return_key=True)
         ],
         [
-            sg.Exit()
+            sg.Button("<", key="_rmv_")
         ]
     ]
 
-    new_window = sg.Window("SAM: Apply mass global block", layout)
+    right = [
+        [
+            sg.Listbox(
+                data,
+                size=(30, 10),
+                key='thelist',
+                enable_events=True
+            )
+        ],
+        [
+            sg.InputText(
+                key='reason',
+                default_text="Reason",
+                size=(32, 1)
+            )
+        ]
+    ]
+
+    layout = [[
+        sg.Column(left),
+        sg.VerticalSeparator(),
+        sg.Column(center),
+        sg.VerticalSeparator(),
+        sg.Column(right)
+    ]]
+
+    lock_window = sg.Window('Mass lock', layout)
 
     while True:
-        event, values = new_window.Read()
+        event, values = lock_window.read()
 
-        if event == "Exit" or event == sg.WIN_CLOSED:
+        if (
+                event == "Exit" or
+                event == sg.WIN_CLOSED or
+                event == "stop"
+        ):
             break
 
-    new_window.close()
+        elif event == "_add_":
+            if values['target'] in data:
+                sg.Popup(
+                    "That is already in the list."
+                )
+                lock_window.FindElement('target').Update("")
+            elif values['target'].strip() == "":
+                lock_window.FindElement('target').Update("")
+            else:
+                data.append(values['target'])
+                lock_window.FindElement('target').Update("")
+                lock_window.FindElement('thelist').Update(data)
+
+        elif event == "thelist":
+            rmv_target = values['thelist'][0]
+
+        elif event == "_rmv_":
+
+            try:
+                data.remove(rmv_target)
+            except UnboundLocalError:
+                continue
+            except ValueError:
+                continue
+            finally:
+                lock_window.FindElement('thelist').Update(data)
+
+        elif event == "_done_":
+
+            if (
+                    values['reason'] == "" or
+                    values['reason'] == "Reason"
+            ):
+                sg.Popup(
+                    "Please check your reason...",
+                    title="Error!"
+                )
+                continue
+            elif len(data) == 0:
+                sg.Popup(
+                    "No accounts to lock! Nothing to do...",
+                    title="Error!"
+                )
+                continue
+
+            targets = ", "
+
+            if sg.popup_yes_no(
+                    "Accounts to lock: " + targets.join(data)
+            ) == "Yes":
+
+                for item in data:
+                    values['target'] = item
+
+                    resp = sam.lock(SAM, values)
+
+                    if resp['status'] == "Error":
+                        sg.Popup(
+                            resp['status'] + " " + resp['message'],
+                            title="Error!"
+                        )
+
+                data = []
+                lock_window.FindElement('thelist').Update(data)
+                lock_window.FindElement('target').Update("")
+
+                sg.Popup(
+                    "Mass lock complete.",
+                    title="Complete!"
+                )
+
+            else:
+                if sg.popup_yes_no(
+                        "Keep current list?"
+                ) == "No":
+                    data = []
+                    lock_window.FindElement('thelist').Update(data)
+                    lock_window.FindElement('target').Update("")
+
+    lock_window.close()
+
+
+def get_massgblock():  # Process and executes a mass global block
+
+    data = []
+
+    left = [
+        [
+            sg.Text(
+                "IP to globally block",
+                size=(20, 1)
+            )
+        ],
+        [
+            sg.InputText(
+                key='target',
+                size=(30, 1)
+            )
+        ],
+        [
+            sg.Button("Block All", key='_done_'),
+            sg.Cancel(key='stop')
+
+        ]
+    ]
+
+    center = [
+        [
+            sg.Button(">", key="_add_", bind_return_key=True)
+        ],
+        [
+            sg.Button("<", key="_rmv_")
+        ]
+    ]
+
+    right = [
+        [
+            sg.Listbox(
+                data,
+                size=(30, 10),
+                key='thelist',
+                enable_events=True
+            )
+        ],
+        [
+            sg.Text("Duration:"),
+            sg.InputText(
+                key='duration',
+                size=(23, 1)
+            )
+        ],
+        [
+            sg.InputText(
+                key='reason',
+                default_text="Reason",
+                size=(32, 1)
+            )
+        ]
+    ]
+
+    layout = [[
+        sg.Column(left),
+        sg.VerticalSeparator(),
+        sg.Column(center),
+        sg.VerticalSeparator(),
+        sg.Column(right)
+    ]]
+
+    mass_window = sg.Window('Mass Global block', layout)
+
+    while True:
+        event, values = mass_window.read()
+
+        if (
+                event == "Exit" or
+                event == sg.WIN_CLOSED or
+                event == "stop"
+        ):
+            break
+
+        elif event == "_add_":
+            if values['target'] in data:
+                sg.Popup(
+                    "That is already in the list."
+                )
+                mass_window.FindElement('target').Update("")
+            elif values['target'].strip() == "":
+                mass_window.FindElement('target').Update("")
+            else:
+                data.append(values['target'])
+                mass_window.FindElement('target').Update("")
+                mass_window.FindElement('thelist').Update(data)
+
+        elif event == "thelist":
+            rmv_target = values['thelist'][0]
+
+        elif event == "_rmv_":
+
+            try:
+                data.remove(rmv_target)
+            except UnboundLocalError:
+                continue
+            except ValueError:
+                continue
+            finally:
+                mass_window.FindElement('thelist').Update(data)
+
+        elif event == "_done_":
+
+            if (
+                    values['reason'] == "" or
+                    values['reason'] == "Reason" or
+                    values['duration'] == "" or
+                    values['duration'] == "Duration"
+            ):
+                sg.Popup(
+                    "Please check your reason and duration...",
+                    title="Error!"
+                )
+                continue
+            elif len(data) == 0:
+                sg.Popup(
+                    "No accounts to block! Nothing to do...",
+                    title="Error!"
+                )
+                continue
+
+            targets = ", "
+
+            if sg.popup_yes_no(
+                    "Accounts to block: " + targets.join(data)
+            ) == "Yes":
+
+                for item in data:
+                    values['target'] = item
+
+                    resp = sam.testrun(SAM, values)
+
+                    if resp['status'] == "Error":
+                        sg.Popup(
+                            resp['status'] + " " + resp['message'],
+                            title="Error!"
+                        )
+
+                data = []
+                mass_window.FindElement('thelist').Update(data)
+                mass_window.FindElement('target').Update("")
+
+                sg.Popup(
+                    "Mass global block complete.",
+                    title="Complete!"
+                )
+
+            else:
+                if sg.popup_yes_no(
+                        "Keep current list?"
+                ) == "No":
+                    data = []
+                    mass_window.FindElement('thelist').Update(data)
+                    mass_window.FindElement('target').Update("")
+
+    mass_window.close()
 
 
 def get_oauth():  # Adds new OAuth information to SAM.cfg

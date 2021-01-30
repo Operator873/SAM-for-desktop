@@ -486,8 +486,8 @@ def testrun(SAM, values):
 
     response = {}
 
-    response['status'] = "Failed"
-    response['message'] = values
+    response['status'] = "Error"
+    response['message'] = str(values)
 
     return response
 
@@ -524,12 +524,12 @@ def build_sam(SAM):
                 sg.Button("Modify global block", key='modgblock', disabled=stew)
             ],
             [
-                sg.Text("Mass actions (Coming soon)")
+                sg.Text("Mass actions")
             ],
             [
                 sg.Button("Mass Block", key='massblock'),
-                sg.Button("Mass Lock", key='masslock', disabled=True),
-                sg.Button("Mass Global Block", key='massgblock', disabled=True)
+                sg.Button("Mass Lock", key='masslock'),
+                sg.Button("Mass Global Block", key='massgblock')
 
             ],
             [
@@ -572,7 +572,7 @@ def build_sam(SAM):
                 sg.Button("Modify global block", key='modgblock', disabled=True)
             ],
             [
-                sg.Text("Mass actions (Coming soon)")
+                sg.Text("Mass actions")
             ],
             [
                 sg.Button("Mass Block", key='massblock', disabled=True),
