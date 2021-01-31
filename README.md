@@ -5,6 +5,8 @@
 [![GitHub stars](https://img.shields.io/github/stars/Operator873/SAM-for-desktop)](https://github.com/Operator873/SAM/stargazers)
 ![GitHub contributors](https://img.shields.io/github/contributors/Operator873/SAM-for-desktop)
 
+![Alt text](https://873gear.com/SAM.png "SAM")
+
 Steward/Sysop Action Module (SAM) Desktopo Python desktop module which supports Wikimedia sysops, global sysops, checkusers, and stewards by allowing block and lock actions from their desktop. It could be modified quite easily to work with Miraheze or any other Mediawiki install.
 
 I take absolutely no responsibility for anything you do on wiki with this module. Play stupid games, win stupid prizes... like being desysopped. 
