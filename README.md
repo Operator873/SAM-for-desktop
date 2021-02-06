@@ -22,7 +22,7 @@ I'm not a professional programmer. At best, I think of myself as a Python hobbyi
 # Installation
 
 ## Using the Windows installer
-1. Download/Run the exe file
+1. Download/Run the SAM-setup.exe file
 2. Default installation path is your Desktop\SAM
 3. Once setup completes, double click SAM-module.exe
 
