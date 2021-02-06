@@ -22,7 +22,7 @@ I'm not a professional programmer. At best, I think of myself as a Python hobbyi
 # Installation
 
 1. Unzip/Untar into /where/ever/is/convientent
-2. from a command prompt: ```python SAM-Module.py```
+2. Double click SAM-Module.exe
 3. You can optionally create a desktop shortcut
 
 # Configuration
