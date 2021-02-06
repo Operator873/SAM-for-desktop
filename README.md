@@ -21,6 +21,12 @@ I'm not a professional programmer. At best, I think of myself as a Python hobbyi
 
 # Installation
 
+## Using the Windows installer
+1. Download/Run the exe file
+2. Default installation path is your Desktop\SAM
+3. Once setup completes, double click SAM-module.exe
+
+## Using the zip file
 1. Unzip/Untar into /where/ever/is/convientent
 2. Double click SAM-Module.exe
 3. You can optionally create a desktop shortcut
