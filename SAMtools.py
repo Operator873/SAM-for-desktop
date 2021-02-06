@@ -130,10 +130,14 @@ def block(SAM, values):  # Execute a typical block
     except:
         reason = values['reason']
 
+    dur = adjust(values['duration'])
+
+    print(dur)
+
     do_block = {
         "action": "block",
         "user": values['target'],
-        "expiry": adjust(values['duration']),
+        "expiry": dur,
         "reason": reason,
         "token": token,
         "allowusertalk": "",
@@ -464,6 +468,11 @@ def get_creds(SAM):  # Formats OAuth credentials for requests
 def adjust(duration):  # Adjusts expiry format to allow for stupid and fat fingers
     adjust = re.sub(r"([0-9]+([0-9]+)?)", r" \1 ", duration)
     adjusted = re.sub(' +', ' ', adjust).strip()
+
+    rename = ['indef', 'indefinite', 'forever']
+
+    if adjusted in rename:
+        adjusted = "never"
 
     return adjusted
 
