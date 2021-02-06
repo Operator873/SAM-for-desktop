@@ -130,14 +130,10 @@ def block(SAM, values):  # Execute a typical block
     except:
         reason = values['reason']
 
-    dur = adjust(values['duration'])
-
-    print(dur)
-
     do_block = {
         "action": "block",
         "user": values['target'],
-        "expiry": dur,
+        "expiry": adjust(values['duration']),
         "reason": reason,
         "token": token,
         "allowusertalk": "",
